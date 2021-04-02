@@ -1,0 +1,71 @@
+# Love Live School Idol Festival All Stars (script 0.0.2)
+# by chrrox
+# script for QuickBMS http://quickbms.aluigi.org
+# original code from https://gist.github.com/esterTion/ff57aafd8dc950216041ac004fc25536
+
+quickbmsver "0.8.0"
+set MEMORY_FILE10 string "
+typedef unsigned char uchar;
+typedef unsigned int uint;
+
+int ll_decrypt(unsigned char *data, int size, int keys_0, int keys_1, int keys_2) {
+    int     i;
+    for(i = 0; i < size; i++) {
+        uchar c = data[i];
+        data[i] = data[i] ^ (((keys_1 ^ keys_0 ^ keys_2) >> 24) & 0xff);
+        keys_0 = (0x343fd * keys_0 + 0x269ec3) & 0xFFFFFFFF;
+        keys_1 = (0x343fd * keys_1 + 0x269ec3) & 0xFFFFFFFF;
+        keys_2 = (0x343fd * keys_2 + 0x269ec3) & 0xFFFFFFFF;
+    }
+}
+"
+
+
+comtype zlib_dynamic
+set VAR string "REPLACE_PLAYERPREFS_KEY"
+string VAR w VAR    # URL encoding (%2F)
+string VAR U VAR    # base64
+
+get myivec filename
+set mykey binary VAR
+encryption "hmac sha1" mykey myivec
+log MEMORY_FILE 0 0
+string TMP p "%s" QUICKBMS_HEXHASH
+#print "%QUICKBMS_HEXHASH%"
+set TMP binary QUICKBMS_HEXHASH
+#print "%TMP%"
+string TMP - 16
+set KEY0 TMP
+set KEY1 TMP
+set KEY2 TMP
+
+string KEY0 > 16
+string KEY1 > 8
+string KEY1 < 8
+string KEY2 < 16
+
+#print "%KEY0%"
+#print "%KEY1%"
+#print "%KEY2%"
+
+set TMP string "$"
+string TMP += KEY0
+set KEY0 long TMP
+
+set TMP string "$"
+string TMP += KEY1
+set KEY1 long TMP
+
+set TMP string "$"
+string TMP += KEY2
+set KEY2 long TMP
+
+#print "%KEY2%"
+#print "%KEY2%"
+#print "%KEY2%"
+
+get SIZE asize
+log MEMORY_FILE2 0 SIZE
+calldll MEMORY_FILE10 "ll_decrypt" "tcc" RET MEMORY_FILE2 SIZE KEY0 KEY1 KEY2
+string myivec + ".sqlite"
+log myivec 0 SIZE MEMORY_FILE2

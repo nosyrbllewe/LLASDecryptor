@@ -1,0 +1,37 @@
+quickbmsver "0.8.0"
+set MEMORY_FILE10 string "
+typedef unsigned char uchar;
+typedef unsigned int uint;
+
+int ll_decrypt(unsigned char *data, int size, int keys_0, int keys_1, int keys_2) {
+    int     i;
+    for(i = 0; i < size; i++) {
+        uchar c = data[i];
+        data[i] = data[i] ^ (((keys_1 ^ keys_0 ^ keys_2) >> 24) & 0xff);
+        keys_0 = (0x343fd * keys_0 + 0x269ec3) & 0xFFFFFFFF;
+        keys_1 = (0x343fd * keys_1 + 0x269ec3) & 0xFFFFFFFF;
+        keys_2 = (0x343fd * keys_2 + 0x269ec3) & 0xFFFFFFFF;
+    }
+}
+"
+
+get SIZE asize
+get NAME basename
+set HEAD 0
+string NAME + .unity3d
+math SIZE - HEAD
+log MEMORY_FILE HEAD SIZE
+
+math constKeys_0 =   0x3039  // 12345
+math constKeys_1 =   0x10932 // 67890
+math constKeys_2 =   0x7AB7  // 31415
+
+set KEY0 long 0x3039
+set KEY1 long REPLACE_KEY1
+set KEY2 long REPLACE_KEY2
+set keys_0 0x3039
+xmath keys_1 "constKeys_1 ^ KEY1"
+xmath keys_2 "constKeys_2 ^ KEY2"
+
+calldll MEMORY_FILE10 "ll_decrypt" "tcc" RET MEMORY_FILE SIZE 12345 KEY1 KEY2
+log NAME 0 SIZE MEMORY_FILE
