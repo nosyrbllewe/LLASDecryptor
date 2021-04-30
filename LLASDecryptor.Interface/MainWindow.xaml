@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LLASDecryptor.Interface"
         mc:Ignorable="d"
-        Title="Love Live School Idol Festival All Stars! Decryptor" Height="450" Width="800">
+        Title="Love Live School Idol Festival All Stars! Decryptor"  Width="650">
     <Grid>
         <StackPanel>
             <StackPanel Orientation="Horizontal">
@@ -18,6 +18,7 @@
                 <TextBlock TextWrapping="Wrap" Text="Output folder to save decrypted files:" VerticalAlignment="Center" Margin="25,5,5,5" />
                 <TextBox Height="23" TextWrapping="Wrap" Text="{Binding Path=OutputPath}" MinWidth="300" HorizontalAlignment="Stretch" />
             </StackPanel>
+            <ProgressBar x:Name="DecryptProgress" Minimum="0" Maximum="1" Margin="10,10,10,10" Height="30"></ProgressBar>
         </StackPanel>
     </Grid>
 </Window>

@@ -1,20 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LLASDecryptor.Core;
+using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using LLASDecryptor;
-using LLASDecryptor.Core;
 
 namespace LLASDecryptor.Interface
 {
@@ -23,25 +9,49 @@ namespace LLASDecryptor.Interface
     /// </summary>
     public partial class MainWindow : Window
     {
-        public string InputPath { get; set; } = @"X:\SIFAS\files";
+        public string InputPath { get; set; } = @"L:\SIFAS\Memu\files";
 
-        public string OutputPath { get; set; } = @"X:\SIFAS\output";
+        public string OutputPath { get; set; } = @"L:\SIFAS\output";
+
+        private double currentProgress = 0;
+
+        private object progressLock = new object();
 
         public MainWindow()
         {
             InitializeComponent();
+            DecryptProgress.Value = 0;
+            var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+            dispatcherTimer.Start();
         }
 
-        private void FileButton_Click(object sender, RoutedEventArgs e)
+        private async void FileButton_Click(object sender, RoutedEventArgs e)
         {
             Decryptor decryptor = new Decryptor(InputPath, OutputPath);
-            decryptor.DecryptFiles("member_model");
+            decryptor.ProgressChanged += ProgressChanged;
+            await decryptor.DecryptFiles("member_model");
+            //decryptor.DecryptFiles("navi_motion");
+            //decryptor.DecryptFiles("navi_timeline");
+            //decryptor.DecryptFiles("live_timeline");
+            //decryptor.DecryptFiles("stage");
+            //decryptor.DecryptFiles("stage_effect");
+            //decryptor.DecryptFiles("member_facial_animation");
+            //decryptor.DecryptFiles("member_facial");
         }
 
         private void DatabaseButton_Click(object sender, RoutedEventArgs e)
         {
             Decryptor decryptor = new Decryptor(InputPath, OutputPath);
             decryptor.DecryptDatabase();
+        }
+
+        private void ProgressChanged(double progress)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                DecryptProgress.Value = progress;
+            });
         }
     }
 }

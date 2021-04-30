@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace LLASDecryptor.Core
 {
@@ -13,12 +12,13 @@ namespace LLASDecryptor.Core
         public string InputFileDirectory { get; set; }
         public string OutputFileDirectory { get; set; }
 
-        private const int MAX_CONCURRENT_PROGRAMS = 40;
+        private long _totalFiles = 0;
+        private long _filesCompleted = 0;
 
-        private int currentPrograms = 0;
+        public double CompletePercentage => _totalFiles == 0 ? 0 : (double)_filesCompleted / _totalFiles;
 
-        private const string REPLACE_KEY1 = "REPLACE_KEY1";
-        private const string REPLACE_KEY2 = "REPLACE_KEY2";
+        public event Action<double> ProgressChanged;
+
         private const string REPLACE_PLAYERPREFS_KEY = "REPLACE_PLAYERPREFS_KEY";
         private static readonly string PlayerPrefsKey = @"gMzd%2FzWivy4OSa7epeBsugBA9zcP1yYkrue0zS%2FzZac%3D";
         //@"2Nfboa8IQvYEUVG9O9wZm%2FsVyw%2Fvu8Mxpiga%2B1WOf8E%3D";
@@ -37,7 +37,7 @@ namespace LLASDecryptor.Core
             DecryptDatabaseFile(hmac);
         }
 
-        public void DecryptFiles(params string[] tables)
+        public async Task DecryptFiles(params string[] tables)
         {
             var databasePath = GetDatabaseFilePath();
             var dec = FindDecScript();
@@ -46,9 +46,13 @@ namespace LLASDecryptor.Core
             using var con = new SqliteConnection(cs);
 
             con.Open();
+
+            foreach (var table in tables)
+                CalculateTotalCount(table, con);
+
             foreach (var table in tables)
             {
-                DecryptTable(table, con, dec);
+                await DecryptTable(table, con, dec);
             }
         }
 
@@ -89,7 +93,14 @@ namespace LLASDecryptor.Core
             return hmac;
         }
 
-        private void DecryptTable(string table, SqliteConnection con, string decPath)
+        private void CalculateTotalCount(string table, SqliteConnection con)
+        {
+            using var countTable = new SqliteCommand($"SELECT Count(*) FROM {table}", con);
+            long rowCount = (long)countTable.ExecuteScalar();
+            _totalFiles += rowCount;
+        }
+
+        private async Task DecryptTable(string table, SqliteConnection con, string decPath)
         {
             string packNameCMD = $"SELECT asset_path, pack_name, head, size, key1, key2 FROM {table}";
             using var cmd = new SqliteCommand(packNameCMD, con);
@@ -99,53 +110,24 @@ namespace LLASDecryptor.Core
 
             while (rdr.Read())
             {
-                DecryptAssetFile(rdr.GetString(1), rdr.GetInt32(2), rdr.GetInt32(3), rdr.GetInt32(4), rdr.GetInt32(5), outputPath, decPath);
+                await DecryptAssetFile(rdr.GetString(1), rdr.GetInt32(2), rdr.GetInt32(3), rdr.GetInt32(4), rdr.GetInt32(5), outputPath, decPath);
             }
         }
 
-        private void DecryptAssetFile(string pack_name, int head, int size, int key1, int key2, string outputPath, string decPath)
+        private Task DecryptAssetFile(string pack_name, int head, int size, int key1, int key2, string outputPath, string decPath)
         {
-            string filePath = $"{InputFileDirectory}{Path.DirectorySeparatorChar}pkg{pack_name[0]}{Path.DirectorySeparatorChar}{pack_name}";
-            string strCmdText;
-
-            var tempFile = SplitFile(filePath, head, size);
-
-            string fileText = File.ReadAllText(decPath);
-            fileText = fileText.Replace(REPLACE_KEY1, key1.ToString());
-            fileText = fileText.Replace(REPLACE_KEY2, key2.ToString());
-            var uniqueScriptName = AppDomain.CurrentDomain.BaseDirectory + $"{pack_name}_{head}_unity3d.txt";
-            File.WriteAllText(uniqueScriptName, fileText);
-
-            while (currentPrograms > MAX_CONCURRENT_PROGRAMS) ;
-
-            currentPrograms++;
-            strCmdText = $"-C -Y -Q -o -F . {uniqueScriptName} {tempFile} {outputPath}";
-            var process = StartProcess(quickbmsPath, strCmdText);
-            process.EnableRaisingEvents = true;
-            process.Exited += (sender, e) =>
+            return Task.Run(() =>
             {
-                currentPrograms--;
-                //Use Try Catch if multiple of the same file are in the list and are thus being used at the same time.
-                if (Path.GetFileName(tempFile).Contains("_"))
-                {
-                    try
-                    {
-                        File.Delete(tempFile);
-                    }
-                    catch { }
-                }
-                if (File.Exists(uniqueScriptName))
-                {
-                    try
-                    {
-                        File.Delete(uniqueScriptName);
-                    }
-                    catch { }
-                }
-            };
+                string filePath = $"{InputFileDirectory}{Path.DirectorySeparatorChar}pkg{pack_name[0]}{Path.DirectorySeparatorChar}{pack_name}";
+
+                var tempFile = SplitFile(filePath, outputPath, head, size, key1, key2);
+
+                _filesCompleted++;
+                ProgressChanged?.Invoke(CompletePercentage);
+            });
         }
 
-        private static string SplitFile(string path, int head, int size)
+        private static string SplitFile(string path, string outputPath, int head, int size, int key1, int key2)
         {
             var file = File.OpenRead(path);
             file.Position = head;
@@ -153,7 +135,12 @@ namespace LLASDecryptor.Core
             byte[] sectionBytes = new byte[size];
             Array.Copy(fileBytes, head, sectionBytes, 0, size);
 
-            string outputPath = $"{path}_{head}";
+            if (!Directory.Exists(outputPath))
+                Directory.CreateDirectory(outputPath);
+
+            outputPath = $"{outputPath}{Path.DirectorySeparatorChar}{Path.GetFileName(path)}_{head}.unity";
+
+            LoveLiveDecryptor.DecryptFile(sectionBytes, 12345, key1, key2);
 
             File.WriteAllBytes(outputPath, sectionBytes);
 
@@ -174,13 +161,11 @@ namespace LLASDecryptor.Core
 
         private void RunQuickBMS(string cmdArgs, string tempFileToDelete)
         {
-            currentPrograms++;
             var process = Process.Start("CMD.exe", $"/C {cmdArgs}");
 
             process.EnableRaisingEvents = true;
             process.Exited += (sender, e) =>
             {
-                currentPrograms--;
                 if (File.Exists(tempFileToDelete))
                 {
                     try
@@ -201,19 +186,6 @@ namespace LLASDecryptor.Core
             proc.StartInfo.Arguments = arguments;
             proc.StartInfo.CreateNoWindow = true;
             return proc.Start();
-        }
-
-        private Process StartProcess(string filePath, string arguments)
-        {
-            ProcessStartInfo psi = new ProcessStartInfo
-            {
-                FileName = filePath,
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                Arguments = arguments
-            };
-            return Process.Start(psi);
         }
     }
 }
