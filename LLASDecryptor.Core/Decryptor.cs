@@ -12,6 +12,8 @@ namespace LLASDecryptor.Core
         public string InputFileDirectory { get; set; }
         public string OutputFileDirectory { get; set; }
 
+        public string StatusText { get; private set; }
+
         private long _totalFiles = 0;
         private long _filesCompleted = 0;
 
@@ -20,7 +22,8 @@ namespace LLASDecryptor.Core
         public event Action<double> ProgressChanged;
 
         private const string REPLACE_PLAYERPREFS_KEY = "REPLACE_PLAYERPREFS_KEY";
-        private static readonly string PlayerPrefsKey = @"gMzd%2FzWivy4OSa7epeBsugBA9zcP1yYkrue0zS%2FzZac%3D";
+        private static readonly string PlayerPrefsKey = @"3qDUnqxXY2DKX9mpkKwCv%2FlnWFp%2BLMK%2B2n5RsaOHj3c%3D";
+        //@"gMzd%2FzWivy4OSa7epeBsugBA9zcP1yYkrue0zS%2FzZac%3D";
         //@"2Nfboa8IQvYEUVG9O9wZm%2FsVyw%2Fvu8Mxpiga%2B1WOf8E%3D";
 
         private static readonly string quickbmsPath = @"C:\Users\bryso\Modding\quickbms\quickbms_4gb_files.exe";
@@ -39,8 +42,10 @@ namespace LLASDecryptor.Core
 
         public async Task DecryptFiles(params string[] tables)
         {
+            _filesCompleted = 0;
+            _totalFiles = 0;
+
             var databasePath = GetDatabaseFilePath();
-            var dec = FindDecScript();
 
             string cs = $"Data Source=file:{databasePath}";
             using var con = new SqliteConnection(cs);
@@ -52,7 +57,7 @@ namespace LLASDecryptor.Core
 
             foreach (var table in tables)
             {
-                await DecryptTable(table, con, dec);
+                await DecryptTable(table, con);
             }
         }
 
@@ -73,16 +78,6 @@ namespace LLASDecryptor.Core
 
         private FileInfo TryGetDatabaseFileInfo() => new DirectoryInfo(OutputFileDirectory).GetFiles("asset_a_ja.db*.sqlite").FirstOrDefault();
 
-        private string FindDecScript()
-        {
-            string dec = AppDomain.CurrentDomain.BaseDirectory + "dec.txt";
-            if (!File.Exists(dec))
-            {
-                throw new FileNotFoundException("Dec script file not found.");
-            }
-            return dec;
-        }
-
         private string FindHmacScript()
         {
             string hmac = AppDomain.CurrentDomain.BaseDirectory + "hmac.txt";
@@ -100,7 +95,7 @@ namespace LLASDecryptor.Core
             _totalFiles += rowCount;
         }
 
-        private async Task DecryptTable(string table, SqliteConnection con, string decPath)
+        private async Task DecryptTable(string table, SqliteConnection con)
         {
             string packNameCMD = $"SELECT asset_path, pack_name, head, size, key1, key2 FROM {table}";
             using var cmd = new SqliteCommand(packNameCMD, con);
@@ -110,11 +105,11 @@ namespace LLASDecryptor.Core
 
             while (rdr.Read())
             {
-                await DecryptAssetFile(rdr.GetString(1), rdr.GetInt32(2), rdr.GetInt32(3), rdr.GetInt32(4), rdr.GetInt32(5), outputPath, decPath);
+                await DecryptAssetFile(rdr.GetString(1), rdr.GetInt32(2), rdr.GetInt32(3), rdr.GetInt32(4), rdr.GetInt32(5), outputPath);
             }
         }
 
-        private Task DecryptAssetFile(string pack_name, int head, int size, int key1, int key2, string outputPath, string decPath)
+        private Task DecryptAssetFile(string pack_name, int head, int size, int key1, int key2, string outputPath)
         {
             return Task.Run(() =>
             {

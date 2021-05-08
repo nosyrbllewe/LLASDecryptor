@@ -1,5 +1,7 @@
 ﻿using LLASDecryptor.Core;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace LLASDecryptor.Interface
@@ -9,7 +11,7 @@ namespace LLASDecryptor.Interface
     /// </summary>
     public partial class MainWindow : Window
     {
-        public string InputPath { get; set; } = @"L:\SIFAS\Memu\files";
+        public string InputPath { get; set; } = @"L:\SIFAS\Memu\SIFAS\files";
 
         public string OutputPath { get; set; } = @"L:\SIFAS\output";
 
@@ -17,12 +19,29 @@ namespace LLASDecryptor.Interface
 
         private object progressLock = new object();
 
+        private List<string> fileTables = new List<string>()
+        {
+            "member_model",
+            "navi_motion",
+            "navi_timeline",
+            "live_timeline",
+            "stage",
+            "stage_effect",
+            "member_facial_animation",
+            "member_facial",
+        };
+
         public MainWindow()
         {
             InitializeComponent();
             DecryptProgress.Value = 0;
             var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+            DatabaseTables.Tables
+                .Select(t => t.TableName)
+                .OrderBy(t => t)
+                .ToList().
+                ForEach(t => TablesList.Items.Add(t));
             dispatcherTimer.Start();
         }
 
@@ -30,14 +49,21 @@ namespace LLASDecryptor.Interface
         {
             Decryptor decryptor = new Decryptor(InputPath, OutputPath);
             decryptor.ProgressChanged += ProgressChanged;
-            await decryptor.DecryptFiles("member_model");
-            //decryptor.DecryptFiles("navi_motion");
-            //decryptor.DecryptFiles("navi_timeline");
-            //decryptor.DecryptFiles("live_timeline");
-            //decryptor.DecryptFiles("stage");
-            //decryptor.DecryptFiles("stage_effect");
-            //decryptor.DecryptFiles("member_facial_animation");
-            //decryptor.DecryptFiles("member_facial");
+
+            var listBoxItems = new List<string>(TablesList.SelectedItems.Cast<string>());
+            fileTables = listBoxItems;//.Select(lb => lb..ToString()).ToList();// DatabaseTables.Tables.Select(t => t.TableName).ToList();
+
+            int tablesCompleted = 0;
+            int totalTables = fileTables.Count;
+            UpdateOverallProgress(tablesCompleted, totalTables);
+            foreach (var table in fileTables)
+            {
+                ProgressText.Text = $"Processing '{table}'";
+                await decryptor.DecryptFiles(table);
+                tablesCompleted++;
+                UpdateOverallProgress(tablesCompleted, totalTables);
+            }
+            ProgressText.Text = "Completed!";
         }
 
         private void DatabaseButton_Click(object sender, RoutedEventArgs e)
@@ -52,6 +78,11 @@ namespace LLASDecryptor.Interface
             {
                 DecryptProgress.Value = progress;
             });
+        }
+
+        private void UpdateOverallProgress(int tablesCompleted, int totalTables)
+        {
+            OverallProgress.Value = (double)tablesCompleted / totalTables;
         }
     }
 }

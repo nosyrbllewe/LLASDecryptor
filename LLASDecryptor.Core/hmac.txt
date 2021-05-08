@@ -31,9 +31,9 @@ set mykey binary VAR
 encryption "hmac sha1" mykey myivec
 log MEMORY_FILE 0 0
 string TMP p "%s" QUICKBMS_HEXHASH
-#print "%QUICKBMS_HEXHASH%"
+print "%QUICKBMS_HEXHASH%"
 set TMP binary QUICKBMS_HEXHASH
-#print "%TMP%"
+print "%TMP%"
 string TMP - 16
 set KEY0 TMP
 set KEY1 TMP
@@ -60,9 +60,9 @@ set TMP string "$"
 string TMP += KEY2
 set KEY2 long TMP
 
-#print "%KEY2%"
-#print "%KEY2%"
-#print "%KEY2%"
+print "%KEY0%"
+print "%KEY1%"
+print "%KEY2%"
 
 get SIZE asize
 log MEMORY_FILE2 0 SIZE

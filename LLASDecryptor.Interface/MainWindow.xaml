@@ -1,24 +1,29 @@
 ﻿<Window x:Class="LLASDecryptor.Interface.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LLASDecryptor.Interface"
         mc:Ignorable="d"
-        Title="Love Live School Idol Festival All Stars! Decryptor"  Width="650">
+        Title="Love Live School Idol Festival All Stars! Decryptor"  Width="650" Height="150">
     <Grid>
-        <StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Button Name="DatabaseButton" Content="Decrypt Database" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Margin="5,5,5,5" Click="DatabaseButton_Click" />
-                <TextBlock TextWrapping="Wrap" Text="Input 'files' folder to decrypt:" VerticalAlignment="Center" Margin="70,5,5,5" />
-                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding Path=InputPath}" MinWidth="300" HorizontalAlignment="Stretch" />
+        <StackPanel Orientation="Horizontal">
+            <TextBlock>Tables</TextBlock>
+            <ListBox x:Name="TablesList" Margin="0,20,0,0" SelectionMode="Multiple" />
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Name="DatabaseButton" Content="Decrypt Database" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Margin="5,5,5,5" Click="DatabaseButton_Click" />
+                    <TextBlock TextWrapping="Wrap" Text="Input 'files' folder to decrypt:" VerticalAlignment="Center" Margin="70,5,5,5" />
+                    <TextBox Height="23" TextWrapping="Wrap" Text="{Binding Path=InputPath}" MinWidth="300" HorizontalAlignment="Stretch" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Name="FileButton" Content="Decrypt Files" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Margin="5,5,5,5" Click="FileButton_Click" />
+                    <TextBlock TextWrapping="Wrap" Text="Output folder to save decrypted files:" VerticalAlignment="Center" Margin="25,5,5,5" />
+                    <TextBox Height="23" TextWrapping="Wrap" Text="{Binding Path=OutputPath}" MinWidth="300" HorizontalAlignment="Stretch" />
+                </StackPanel>
+                <ProgressBar x:Name="DecryptProgress" Minimum="0" Maximum="1" Margin="10,5,10,5" Height="15" />
+                <ProgressBar x:Name="OverallProgress" Minimum="0" Maximum="1" Margin="10,5,10,5" Height="15" />
+                <TextBlock x:Name="ProgressText" Text="First, decrypt the database then decrypt the files." TextAlignment="Center"></TextBlock>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Button Name="FileButton" Content="Decrypt Files" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Margin="5,5,5,5" Click="FileButton_Click" />
-                <TextBlock TextWrapping="Wrap" Text="Output folder to save decrypted files:" VerticalAlignment="Center" Margin="25,5,5,5" />
-                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding Path=OutputPath}" MinWidth="300" HorizontalAlignment="Stretch" />
-            </StackPanel>
-            <ProgressBar x:Name="DecryptProgress" Minimum="0" Maximum="1" Margin="10,10,10,10" Height="30"></ProgressBar>
         </StackPanel>
     </Grid>
 </Window>
