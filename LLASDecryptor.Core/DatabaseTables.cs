@@ -23,7 +23,7 @@ namespace LLASDecryptor.Core
             new EncryptedTable("skill_wipe", "Skill Wipe"),
             new EncryptedTable("stage", "Stage"),
             new EncryptedTable("stage_effect", "Stage Effect"),
-            new EncryptedTable("texture", "Texture (e.g. Cards)")
+            new TextureTable("texture", "Misc Textures (e.g. Cards)")
         };
     }
 }

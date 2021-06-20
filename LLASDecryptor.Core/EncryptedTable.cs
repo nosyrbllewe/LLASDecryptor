@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LLASDecryptor.Core
 {
-    public sealed record EncryptedTable : Table
+    public record EncryptedTable : Table
     {
         public EncryptedTable(string tableName, string displayName) : base(tableName, displayName) { }
 
@@ -39,7 +39,12 @@ namespace LLASDecryptor.Core
             var tempFile = SplitFile(filePath, outputPath, head, size, key1, key2);
         }
 
-        private static string SplitFile(string path, string outputPath, int head, int size, int key1, int key2)
+        protected virtual string GetFileExtension(byte[] fileData)
+        {
+            return ".unity";
+        }
+
+        private string SplitFile(string path, string outputPath, int head, int size, int key1, int key2)
         {
             var file = File.OpenRead(path);
             file.Position = head;
@@ -50,9 +55,11 @@ namespace LLASDecryptor.Core
             if (!Directory.Exists(outputPath))
                 Directory.CreateDirectory(outputPath);
 
-            outputPath = $"{outputPath}{Path.DirectorySeparatorChar}{Path.GetFileName(path)}_{head}.unity";
+            
 
             LoveLiveDecryptor.DecryptFile(sectionBytes, 12345, key1, key2);
+
+            outputPath = $"{outputPath}{Path.DirectorySeparatorChar}{Path.GetFileName(path)}_{head}{GetFileExtension(sectionBytes)}";
 
             File.WriteAllBytes(outputPath, sectionBytes);
 
