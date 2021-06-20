@@ -11,7 +11,7 @@ namespace LLASDecryptor.Interface
     /// </summary>
     public partial class MainWindow : Window
     {
-        public string InputPath { get; set; } = @"L:\SIFAS\Memu\SIFAS\files";
+        public string InputPath { get; set; } = @"L:\SIFAS\Bluestacks\files\files";
 
         public string OutputPath { get; set; } = @"L:\SIFAS\output";
 
@@ -49,21 +49,40 @@ namespace LLASDecryptor.Interface
         {
             Decryptor decryptor = new Decryptor(InputPath, OutputPath);
             decryptor.ProgressChanged += ProgressChanged;
+            decryptor.ConsoleLog += LogConsole;
 
             var listBoxItems = new List<string>(TablesList.SelectedItems.Cast<string>());
             fileTables = listBoxItems;//.Select(lb => lb..ToString()).ToList();// DatabaseTables.Tables.Select(t => t.TableName).ToList();
 
+            if(fileTables.Count == 0)
+            {
+                LogConsole("No tables selected to decrypt");
+                return;
+            }
+
+
             int tablesCompleted = 0;
             int totalTables = fileTables.Count;
             UpdateOverallProgress(tablesCompleted, totalTables);
-            foreach (var table in fileTables)
+            foreach (var tableName in fileTables)
             {
-                ProgressText.Text = $"Processing '{table}'";
+                ProgressText.Text = $"Processing '{tableName}'";
+
+                var table = DatabaseTables.Tables.Find(t => t.TableName == tableName);
+
                 await decryptor.DecryptFiles(table);
                 tablesCompleted++;
                 UpdateOverallProgress(tablesCompleted, totalTables);
             }
             ProgressText.Text = "Completed!";
+        }
+
+        private void LogConsole(string message)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                ConsoleUI.Text += $"\n{message}";
+            });
         }
 
         private void DatabaseButton_Click(object sender, RoutedEventArgs e)

@@ -4,25 +4,26 @@ namespace LLASDecryptor.Core
 {
     public static class DatabaseTables
     {
-        public static List<Table> Tables = new List<Table>()
+        public static List<Table> Tables { get; } = new List<Table>()
         {
-            new Table("adv_script", "Adv Script"),
-            new Table("background", "Background"),
-            new Table("gacha_performance", "Gacha Performance"),
-            new Table("live2d_sd_model", "Live2D SD Model"),
-            new Table("live_prop_skeleton", "Live Prop Skeleton"),
-            new Table("live_timeline", "Live Timeline"),
-            new Table("member_model", "Member Model (3D)"),
-            new Table("member_sd_model", "Member SD Model (2D)"),
-            new Table("navi_motion", "Navi Motion"),
-            new Table("navi_timeline", "Navi Timeline"),
-            new Table("shader", "Shader"),
-            new Table("skill_effect", "Skill Effect"),
-            new Table("skill_timeline", "Skill Timeline"),
-            new Table("skill_wipe", "Skill Wipe"),
-            new Table("stage", "Stage"),
-            new Table("stage_effect", "Stage Effect"),
-            new Table("texture", "Texture (e.g. Cards)")
+            new EncryptedTable("adv_script", "Adv Script"),
+            new EncryptedTable("background", "Background"),
+            new EncryptedTable("gacha_performance", "Gacha Performance"),
+            new EncryptedTable("live2d_sd_model", "Live2D SD Model"),
+            new EncryptedTable("live_prop_skeleton", "Live Prop Skeleton"),
+            new EncryptedTable("live_timeline", "Live Timeline"),
+            new AudioTable("m_asset_sound", "Sound Assets"),
+            new EncryptedTable("member_model", "Member Model (3D)"),
+            new EncryptedTable("member_sd_model", "Member SD Model (2D)"),
+            new EncryptedTable("navi_motion", "Navi Motion"),
+            new EncryptedTable("navi_timeline", "Navi Timeline"),
+            new EncryptedTable("shader", "Shader"),
+            new EncryptedTable("skill_effect", "Skill Effect"),
+            new EncryptedTable("skill_timeline", "Skill Timeline"),
+            new EncryptedTable("skill_wipe", "Skill Wipe"),
+            new EncryptedTable("stage", "Stage"),
+            new EncryptedTable("stage_effect", "Stage Effect"),
+            new EncryptedTable("texture", "Texture (e.g. Cards)")
         };
     }
 }

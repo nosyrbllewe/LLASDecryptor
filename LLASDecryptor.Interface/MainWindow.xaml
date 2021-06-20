@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Love Live School Idol Festival All Stars! Decryptor"  Width="650" Height="150">
+        Title="Love Live School Idol Festival All Stars! Decryptor"  Width="800" Height="700">
     <Grid>
         <StackPanel Orientation="Horizontal">
             <TextBlock>Tables</TextBlock>
@@ -23,6 +23,9 @@
                 <ProgressBar x:Name="DecryptProgress" Minimum="0" Maximum="1" Margin="10,5,10,5" Height="15" />
                 <ProgressBar x:Name="OverallProgress" Minimum="0" Maximum="1" Margin="10,5,10,5" Height="15" />
                 <TextBlock x:Name="ProgressText" Text="First, decrypt the database then decrypt the files." TextAlignment="Center"></TextBlock>
+                <ScrollViewer>
+                    <TextBlock x:Name="ConsoleUI"></TextBlock>
+                </ScrollViewer>
             </StackPanel>
         </StackPanel>
     </Grid>

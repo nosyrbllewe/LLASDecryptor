@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -21,10 +22,11 @@ namespace LLASDecryptor.Core
 
         public event Action<double> ProgressChanged;
 
+        public event Action<string> ConsoleLog;
+
         private const string REPLACE_PLAYERPREFS_KEY = "REPLACE_PLAYERPREFS_KEY";
-        private static readonly string PlayerPrefsKey = @"3qDUnqxXY2DKX9mpkKwCv%2FlnWFp%2BLMK%2B2n5RsaOHj3c%3D";
-        //@"gMzd%2FzWivy4OSa7epeBsugBA9zcP1yYkrue0zS%2FzZac%3D";
-        //@"2Nfboa8IQvYEUVG9O9wZm%2FsVyw%2Fvu8Mxpiga%2B1WOf8E%3D";
+        private static readonly string PlayerPrefsKey = @"xoapWsrPChRhiatkdrfjPrDd0hKv0H0k%2Fg%2BEkCPHcdg%3D";
+            //@"3qDUnqxXY2DKX9mpkKwCv%2FlnWFp%2BLMK%2B2n5RsaOHj3c%3D";
 
         private static readonly string quickbmsPath = @"C:\Users\bryso\Modding\quickbms\quickbms_4gb_files.exe";
 
@@ -40,43 +42,42 @@ namespace LLASDecryptor.Core
             DecryptDatabaseFile(hmac);
         }
 
-        public async Task DecryptFiles(params string[] tables)
+        public async Task DecryptFiles(params Table[] tables)
         {
             _filesCompleted = 0;
             _totalFiles = 0;
 
-            var databasePath = GetDatabaseFilePath();
-
-            string cs = $"Data Source=file:{databasePath}";
-            using var con = new SqliteConnection(cs);
-
-            con.Open();
+            using var databaseReader = new DatabaseReader(OutputFileDirectory);
+            databaseReader.Open();
 
             foreach (var table in tables)
-                CalculateTotalCount(table, con);
+               _totalFiles += databaseReader.GetRowsInTable(table.TableName);
 
             foreach (var table in tables)
             {
-                await DecryptTable(table, con);
+                var columns = table.GetColumns();
+                string outputPath = OutputFileDirectory + "\\Packages" + Path.DirectorySeparatorChar + table.TableName;
+                foreach (var data in databaseReader.DecryptTable(table.TableName, columns))
+                {
+                    await ProcessData(data, table, outputPath);
+                }
             }
         }
 
-        private string GetDatabaseFilePath()
+        async Task ProcessData(List<dynamic> data, Table table, string outputPath)
         {
-            var database = TryGetDatabaseFileInfo();
-            if (database == null)
+            try
             {
-                DecryptDatabase();
-                database = TryGetDatabaseFileInfo();
+                await table.ProcessRow(InputFileDirectory, outputPath, data.ToArray());
+            }
+            catch (FileNotFoundException e)
+            {
+                ConsoleLog?.Invoke($"ERROR: {e.Message}");
             }
 
-            if (database == null)
-                throw new FileNotFoundException("Could not find database file");
-
-            return database.FullName;
+            _filesCompleted++;
+            ProgressChanged?.Invoke(CompletePercentage);
         }
-
-        private FileInfo TryGetDatabaseFileInfo() => new DirectoryInfo(OutputFileDirectory).GetFiles("asset_a_ja.db*.sqlite").FirstOrDefault();
 
         private string FindHmacScript()
         {
@@ -88,34 +89,22 @@ namespace LLASDecryptor.Core
             return hmac;
         }
 
-        private void CalculateTotalCount(string table, SqliteConnection con)
-        {
-            using var countTable = new SqliteCommand($"SELECT Count(*) FROM {table}", con);
-            long rowCount = (long)countTable.ExecuteScalar();
-            _totalFiles += rowCount;
-        }
-
-        private async Task DecryptTable(string table, SqliteConnection con)
-        {
-            string packNameCMD = $"SELECT asset_path, pack_name, head, size, key1, key2 FROM {table}";
-            using var cmd = new SqliteCommand(packNameCMD, con);
-
-            using SqliteDataReader rdr = cmd.ExecuteReader();
-            string outputPath = OutputFileDirectory + "\\Packages" + Path.DirectorySeparatorChar + table;
-
-            while (rdr.Read())
-            {
-                await DecryptAssetFile(rdr.GetString(1), rdr.GetInt32(2), rdr.GetInt32(3), rdr.GetInt32(4), rdr.GetInt32(5), outputPath);
-            }
-        }
-
         private Task DecryptAssetFile(string pack_name, int head, int size, int key1, int key2, string outputPath)
         {
+            
             return Task.Run(() =>
             {
                 string filePath = $"{InputFileDirectory}{Path.DirectorySeparatorChar}pkg{pack_name[0]}{Path.DirectorySeparatorChar}{pack_name}";
 
-                var tempFile = SplitFile(filePath, outputPath, head, size, key1, key2);
+                try
+                {
+                    var tempFile = SplitFile(filePath, outputPath, head, size, key1, key2);
+                }
+                catch (FileNotFoundException e)
+                {
+                    ConsoleLog?.Invoke($"ERROR: {e.Message}");
+
+                }
 
                 _filesCompleted++;
                 ProgressChanged?.Invoke(CompletePercentage);
@@ -170,17 +159,6 @@ namespace LLASDecryptor.Core
                     catch { }
                 }
             };
-        }
-
-        public static bool ExecuteApplication(string Address, string workingDir, string arguments, bool showWindow)
-        {
-            Process proc = new Process();
-            proc.StartInfo.FileName = Address;
-            proc.StartInfo.WorkingDirectory = workingDir;
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.Arguments = arguments;
-            proc.StartInfo.CreateNoWindow = true;
-            return proc.Start();
         }
     }
 }
