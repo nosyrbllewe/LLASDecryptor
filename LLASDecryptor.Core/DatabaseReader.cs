@@ -14,6 +14,8 @@ namespace LLASDecryptor.Core
         private bool disposedValue;
         private SqliteConnection connection;
 
+        private const string FILE_PATTERN = "asset_a_ja.db*";
+
         public DatabaseReader(string databaseFolder)
         {
             _databaseFolder = databaseFolder;
@@ -40,7 +42,7 @@ namespace LLASDecryptor.Core
 
         private string GetDatabaseFilePath()
         {
-            var database = TryGetDatabaseFileInfo();
+            TryGetDatabaseFileInfo(out FileInfo database);
 
             if (database == null)
                 throw new FileNotFoundException("Could not find database file.");
@@ -48,7 +50,11 @@ namespace LLASDecryptor.Core
             return database.FullName;
         }
 
-        private FileInfo TryGetDatabaseFileInfo() => new DirectoryInfo(_databaseFolder).GetFiles("asset_a_ja.db*.sqlite").FirstOrDefault();
+        private bool TryGetDatabaseFileInfo(out FileInfo database)
+        {
+            database = new DirectoryInfo(_databaseFolder).GetFiles(FILE_PATTERN).FirstOrDefault();
+            return database is not null;
+        }
 
         public IEnumerable<List<dynamic>> DecryptTable(string table, SqlColumn[] columns)
         {
@@ -109,7 +115,7 @@ namespace LLASDecryptor.Core
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
-                connection.Dispose();
+                connection?.Dispose();
                 disposedValue = true;
             }
         }
