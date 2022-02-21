@@ -10,6 +10,8 @@ namespace LLASDecryptor.Core
 {
     public record EncryptedTable : Table
     {
+        const string FILE_EXTENSION = ".unity";
+
         public EncryptedTable(string tableName, string displayName) : base(tableName, displayName) { }
 
         public override SqlColumn[] GetColumns()
@@ -41,7 +43,7 @@ namespace LLASDecryptor.Core
 
         protected virtual string GetFileExtension(byte[] fileData)
         {
-            return ".unity";
+            return FILE_EXTENSION;
         }
 
         private string SplitFile(string path, string outputPath, int head, int size, int key1, int key2)

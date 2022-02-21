@@ -25,15 +25,16 @@ namespace LLASDecryptor.Core
         public event Action<string> ConsoleLog;
 
         private const string REPLACE_PLAYERPREFS_KEY = "REPLACE_PLAYERPREFS_KEY";
-        private static readonly string PlayerPrefsKey = @"xoapWsrPChRhiatkdrfjPrDd0hKv0H0k%2Fg%2BEkCPHcdg%3D";
-            //@"3qDUnqxXY2DKX9mpkKwCv%2FlnWFp%2BLMK%2B2n5RsaOHj3c%3D";
 
-        private static readonly string quickbmsPath = @"C:\Users\bryso\Modding\quickbms\quickbms_4gb_files.exe";
+        private static readonly string quickbmsPath = @"quickbms_4gb_files.exe";
 
-        public Decryptor(string inputFileLocation, string outputFileLocation)
+        public string PlayerPrefsSqKey { get; }
+
+        public Decryptor(string inputFileLocation, string outputFileLocation, string playerPrefsKey)
         {
             InputFileDirectory = inputFileLocation;
             OutputFileDirectory = outputFileLocation;
+            PlayerPrefsSqKey = playerPrefsKey;
         }
 
         public void DecryptDatabase()
@@ -134,7 +135,7 @@ namespace LLASDecryptor.Core
         private void DecryptDatabaseFile(string hmacPath)
         {
             string fileText = File.ReadAllText(hmacPath);
-            fileText = fileText.Replace(REPLACE_PLAYERPREFS_KEY, PlayerPrefsKey);
+            fileText = fileText.Replace(REPLACE_PLAYERPREFS_KEY, PlayerPrefsSqKey);
             var uniqueScriptName = AppDomain.CurrentDomain.BaseDirectory + $"hmac_temp.txt";
             File.WriteAllText(uniqueScriptName, fileText);
 

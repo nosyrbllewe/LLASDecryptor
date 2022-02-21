@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="LLASDecryptor.Interface.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="PlayerPrefsKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">syENa%2B1J5ZdicEHFjEVYdBL%2FhtT7GSwLGv%2FCe8tngBI%3D</Value>
+    </Setting>
+    <Setting Name="InputFiles" Type="System.String" Scope="User">
+      <Value Profile="(Default)">L:\SIFAS\input\files</Value>
+    </Setting>
+    <Setting Name="OutputFiles" Type="System.String" Scope="User">
+      <Value Profile="(Default)">L:\SIFAS\output</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
