@@ -5,6 +5,11 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <StartupObject>LLASDecryptor.Interface.App</StartupObject>
+    <AssemblyName>Love Live Decryptor</AssemblyName>
+    <RepositoryUrl>https://github.com/nosyrbllewe/LLASDecryptor</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>0.1</AssemblyVersion>
+    <FileVersion>0.1</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

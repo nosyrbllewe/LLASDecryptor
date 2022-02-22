@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Web;
 
@@ -17,12 +18,28 @@ namespace LLASDecryptor.Core
             }
         }
 
-        public static void GetHmacSha1(string databaseKey, byte[] shaKey)
+        public static void DecryptDatabase(byte[] data, string fileName, string databaseKey)
         {
-            System.Security.Cryptography.HMACSHA1 sha = new System.Security.Cryptography.HMACSHA1(shaKey);
-            databaseKey = HttpUtility.UrlEncode(databaseKey);
-            var bytes = Encoding.UTF8.GetBytes(databaseKey);
-            databaseKey = Convert.ToBase64String(bytes);
+            databaseKey = HttpUtility.UrlDecode(databaseKey);
+            byte[] key = Convert.FromBase64String(databaseKey);
+            byte[] fileNameBytes = Encoding.UTF8.GetBytes(fileName);
+            string stringKey = Encoding.UTF8.GetString(key);
+            //databaseKey = Encoding.UTF8.GetString(bytes);
+
+            System.Security.Cryptography.HMACSHA1 sha = new System.Security.Cryptography.HMACSHA1(key);
+            byte[] decryptedData = sha.ComputeHash(fileNameBytes);
+            string hashString = Convert.ToHexString(decryptedData);
+            string shortHash = hashString.Remove(hashString.Length - 16);
+
+            string hexKey0 = shortHash.Substring(0, shortHash.Length - 16);
+            string hexKey1 = shortHash.Substring(0, shortHash.Length - 8).Substring(8,8);
+            string hexKey2 = shortHash.Substring(16, shortHash.Length - 16);
+
+            int key0 = BitConverter.ToInt32(Convert.FromHexString(hexKey0).Reverse().ToArray());
+            int key1 = BitConverter.ToInt32(Convert.FromHexString(hexKey1).Reverse().ToArray());
+            int key2 = BitConverter.ToInt32(Convert.FromHexString(hexKey2).Reverse().ToArray());
+
+            DecryptFile(data, key0, key1, key2);
         }
     }
 }

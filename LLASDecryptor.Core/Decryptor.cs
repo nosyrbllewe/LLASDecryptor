@@ -24,27 +24,19 @@ namespace LLASDecryptor.Core
 
         public event Action<string> ConsoleLog;
 
-        private const string REPLACE_PLAYERPREFS_KEY = "REPLACE_PLAYERPREFS_KEY";
-
-        private static readonly string quickbmsPath = @"quickbms_4gb_files.exe";
-
-        public string PlayerPrefsSqKey { get; }
+        public string PlayerPrefsKey { get; }
 
         public Decryptor(string inputFileLocation, string outputFileLocation, string playerPrefsKey)
         {
             InputFileDirectory = inputFileLocation;
             OutputFileDirectory = outputFileLocation;
-            PlayerPrefsSqKey = playerPrefsKey;
-        }
-
-        public void DecryptDatabase()
-        {
-            var hmac = FindHmacScript();
-            DecryptDatabaseFile(hmac);
+            PlayerPrefsKey = playerPrefsKey;
         }
 
         public async Task DecryptFiles(params Table[] tables)
         {
+            DecryptDatabaseFiles();
+
             _filesCompleted = 0;
             _totalFiles = 0;
 
@@ -80,38 +72,6 @@ namespace LLASDecryptor.Core
             ProgressChanged?.Invoke(CompletePercentage);
         }
 
-        private string FindHmacScript()
-        {
-            string hmac = AppDomain.CurrentDomain.BaseDirectory + "hmac.txt";
-            if (!File.Exists(hmac))
-            {
-                throw new FileNotFoundException("Hmac script file not found.");
-            }
-            return hmac;
-        }
-
-        private Task DecryptAssetFile(string pack_name, int head, int size, int key1, int key2, string outputPath)
-        {
-            
-            return Task.Run(() =>
-            {
-                string filePath = $"{InputFileDirectory}{Path.DirectorySeparatorChar}pkg{pack_name[0]}{Path.DirectorySeparatorChar}{pack_name}";
-
-                try
-                {
-                    var tempFile = SplitFile(filePath, outputPath, head, size, key1, key2);
-                }
-                catch (FileNotFoundException e)
-                {
-                    ConsoleLog?.Invoke($"ERROR: {e.Message}");
-
-                }
-
-                _filesCompleted++;
-                ProgressChanged?.Invoke(CompletePercentage);
-            });
-        }
-
         private static string SplitFile(string path, string outputPath, int head, int size, int key1, int key2)
         {
             var file = File.OpenRead(path);
@@ -132,34 +92,24 @@ namespace LLASDecryptor.Core
             return outputPath;
         }
 
-        private void DecryptDatabaseFile(string hmacPath)
+        private void DecryptDatabaseFiles()
         {
-            string fileText = File.ReadAllText(hmacPath);
-            fileText = fileText.Replace(REPLACE_PLAYERPREFS_KEY, PlayerPrefsSqKey);
-            var uniqueScriptName = AppDomain.CurrentDomain.BaseDirectory + $"hmac_temp.txt";
-            File.WriteAllText(uniqueScriptName, fileText);
 
-            string args = $"{quickbmsPath} -C -F \"*.db\" {uniqueScriptName} {InputFileDirectory} {OutputFileDirectory}";
-
-            RunQuickBMS(args, uniqueScriptName);
-        }
-
-        private void RunQuickBMS(string cmdArgs, string tempFileToDelete)
-        {
-            var process = Process.Start("CMD.exe", $"/C {cmdArgs}");
-
-            process.EnableRaisingEvents = true;
-            process.Exited += (sender, e) =>
+            if(!Directory.Exists(OutputFileDirectory))
             {
-                if (File.Exists(tempFileToDelete))
-                {
-                    try
-                    {
-                        File.Delete(tempFileToDelete);
-                    }
-                    catch { }
-                }
-            };
+                Directory.CreateDirectory(OutputFileDirectory);
+            }
+
+            FileInfo[] files = new DirectoryInfo(InputFileDirectory).GetFiles("*.db");
+            foreach (FileInfo file in files)
+            {
+                string path = file.FullName;
+                byte[] data = File.ReadAllBytes(path);
+                LoveLiveDecryptor.DecryptDatabase(data, file.Name, PlayerPrefsKey);
+
+                string newFilePath = $"{OutputFileDirectory}{Path.DirectorySeparatorChar}{file.Name}.sqlite";
+                File.WriteAllBytes(newFilePath, data);
+            }
         }
     }
 }

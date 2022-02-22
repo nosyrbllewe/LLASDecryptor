@@ -106,12 +106,6 @@ namespace LLASDecryptor.Interface
             });
         }
 
-        private void DatabaseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Decryptor decryptor = BuildDecryptor();
-            decryptor.DecryptDatabase();
-        }
-
         private void ProgressChanged(double progress)
         {
             Dispatcher.Invoke(() =>

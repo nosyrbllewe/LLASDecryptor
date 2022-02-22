@@ -10,30 +10,26 @@
     <Grid>
         <StackPanel Orientation="Horizontal">
             <StackPanel Orientation="Vertical">
+                <Button Name="FileButton" Content="Decrypt Files" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Margin="5,5,5,5" Click="FileButton_Click" />
                 <TextBlock>Tables to Decrypt:</TextBlock>
                 <ListBox x:Name="TablesList" SelectionMode="Multiple" />
             </StackPanel>
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <Button Name="DatabaseButton" Content="Decrypt Database" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Margin="5,5,5,5" Click="DatabaseButton_Click" />
                     <TextBlock TextWrapping="Wrap" Text="Input 'files' folder to decrypt:" VerticalAlignment="Center" Margin="70,5,5,5" />
                     <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=_window, Path=InputPath, Mode=TwoWay,
-
                         UpdateSourceTrigger=PropertyChanged}" MinWidth="300" HorizontalAlignment="Stretch" />
                     <Button Name="InputFolderSelect" Height="23" Click="InputFolderSelect_Click">Select</Button>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <Button Name="FileButton" Content="Decrypt Files" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Margin="5,5,5,5" Click="FileButton_Click" />
                     <TextBlock TextWrapping="Wrap" Text="Output folder to save decrypted files:" VerticalAlignment="Center" Margin="25,5,5,5" />
                     <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=_window, Path=OutputPath, Mode=TwoWay,
-
                         UpdateSourceTrigger=PropertyChanged}" MinWidth="300" HorizontalAlignment="Stretch" />
                     <Button Name="OutputFolderSelect" Height="23" Click="OutputFolderSelect_Click">Select</Button>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock TextWrapping="Wrap" Text="Player Prefs Secret Key:" VerticalAlignment="Center" Margin="25,5,5,5" />
                     <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=_window, Path=PlayerPrefsKey, Mode=TwoWay,
-
                         UpdateSourceTrigger=PropertyChanged}" MinWidth="500" HorizontalAlignment="Stretch" />
                 </StackPanel>
                 <ProgressBar x:Name="DecryptProgress" Minimum="0" Maximum="1" Margin="10,5,10,5" Height="15" />
