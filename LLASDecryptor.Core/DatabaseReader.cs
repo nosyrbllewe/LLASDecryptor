@@ -14,7 +14,7 @@ namespace LLASDecryptor.Core
         private bool disposedValue;
         private SqliteConnection connection;
 
-        private const string FILE_PATTERN = "asset_a_ja.db*";
+        private const string FILE_PATTERN = "asset_a_*";
 
         public DatabaseReader(string databaseFolder)
         {
@@ -56,7 +56,7 @@ namespace LLASDecryptor.Core
             return database is not null;
         }
 
-        public IEnumerable<List<dynamic>> DecryptTable(string table, SqlColumn[] columns)
+        public IEnumerable<List<object>> DecryptTable(string table, SqlColumn[] columns)
         {
             string sqlColumns = string.Join(", ", columns.Select(c => c.ColumnName));
 
@@ -72,11 +72,11 @@ namespace LLASDecryptor.Core
 
             while (rdr.Read())
             {
-                List<dynamic> dynamicColumns = new List<dynamic>();
+                List<object> dynamicColumns = new List<object>();
                 for(int i = 0; i < columns.Length; i++)
                 {
 
-                    dynamic value = GetColumnValue(columns[i].Type, rdr, i);
+                    object value = GetColumnValue(columns[i].Type, rdr, i);
                     dynamicColumns.Add(value);
                 }
                 yield return dynamicColumns;
