@@ -57,7 +57,7 @@ namespace LLASDecryptor.Core
             }
         }
 
-        async Task ProcessData(List<dynamic> data, Table table, string outputPath)
+        async Task ProcessData(List<object> data, Table table, string outputPath)
         {
             try
             {
@@ -65,7 +65,7 @@ namespace LLASDecryptor.Core
             }
             catch (FileNotFoundException e)
             {
-                ConsoleLog?.Invoke($"ERROR: {e.Message}");
+                ConsoleLog?.Invoke($"WARNING: {e.Message}. Skipping File");
             }
 
             _filesCompleted++;
