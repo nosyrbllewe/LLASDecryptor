@@ -23,8 +23,6 @@ namespace LLASDecryptor.Core
             databaseKey = HttpUtility.UrlDecode(databaseKey);
             byte[] key = Convert.FromBase64String(databaseKey);
             byte[] fileNameBytes = Encoding.UTF8.GetBytes(fileName);
-            string stringKey = Encoding.UTF8.GetString(key);
-            //databaseKey = Encoding.UTF8.GetString(bytes);
 
             System.Security.Cryptography.HMACSHA1 sha = new System.Security.Cryptography.HMACSHA1(key);
             byte[] decryptedData = sha.ComputeHash(fileNameBytes);
