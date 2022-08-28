@@ -8,6 +8,8 @@ jobs:
   create_release:
     name: Create GitHub Release
     runs-on: windows-2019
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
