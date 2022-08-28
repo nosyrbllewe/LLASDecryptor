@@ -8,9 +8,11 @@
     <AssemblyName>Love Live Decryptor</AssemblyName>
     <RepositoryUrl>https://github.com/nosyrbllewe/LLASDecryptor</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>0.2.1.1</AssemblyVersion>
-    <FileVersion>0.2.1.1</FileVersion>
+    <AssemblyVersion>0.2.1.4</AssemblyVersion>
+    <FileVersion>0.2.1.4</FileVersion>
     <SignAssembly>False</SignAssembly>
+    <PackageIcon>icon.png</PackageIcon>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -18,11 +20,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LLASDecryptor.Core\LLASDecryptor.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
