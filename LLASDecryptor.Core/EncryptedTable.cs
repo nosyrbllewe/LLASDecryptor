@@ -10,9 +10,17 @@ namespace LLASDecryptor.Core
 {
     public record EncryptedTable : Table
     {
-        const string FILE_EXTENSION = ".unity";
+        private readonly string unityFileExtension = ".unity";
 
-        public EncryptedTable(string tableName, string displayName) : base(tableName, displayName) { }
+        private readonly string defaultFileExtension = string.Empty;
+
+        const string ASSETBUNDLE_SIGNATURE = "UnityFS";
+
+        private byte[] assetBundleSignatureBytes;
+        public EncryptedTable(string tableName, string displayName) : base(tableName, displayName) 
+        {
+            assetBundleSignatureBytes = Encoding.UTF8.GetBytes(ASSETBUNDLE_SIGNATURE);
+        }
 
         public override SqlColumn[] GetColumns()
         {
@@ -43,8 +51,17 @@ namespace LLASDecryptor.Core
 
         protected virtual string GetFileExtension(byte[] fileData)
         {
-            return FILE_EXTENSION;
+            if(IsUnityFile(fileData))
+                return unityFileExtension;
+            return defaultFileExtension;
+
         }
+
+        private bool IsUnityFile(byte[] fileData)
+        {
+            return FileDataChecker.ContainsFileSignature(fileData, assetBundleSignatureBytes);
+        }
+
 
         private string SplitFile(string path, string outputPath, int head, int size, int key1, int key2)
         {
