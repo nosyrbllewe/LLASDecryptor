@@ -9,46 +9,26 @@ jobs:
     name: Create GitHub Release
     runs-on: windows-2019
     steps:
-      - name: Install 7Zip PowerShell Module
-        shell: powershell
-        run: Install-Module 7Zip4PowerShell -Force -Verbose
-      - uses: actions/checkout@v2
-      
-      - name: Build Binary
-        shell: cmd
-        run: call .\Build.cmd
-      - name: Build Artifact
-        shell: cmd
-        run: call .\ArtifactBuild.cmd
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: |
-            Automated Release by GitHub Action CI
-          draft: false
-          prerelease: true
-      - name: Upload Release Asset (x64)
-        id: upload-release-asset-x64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./LLASDecryptorX64.ZIP
-          asset_name: LLASDecryptorX64.ZIP
-          asset_content_type: application/zip
-      - name: Upload Release Asset (x86)
-        id: upload-release-asset-x86
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./LLASDecryptorX86.ZIP
-          asset_name: LLASDecryptorX86.ZIP
-          asset_content_type: application/zip
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+    - name: Publish
+      run: dotnet publish
+    - name: Archive Release
+      uses: thedoctor0/zip-release@main
+      with:
+        type: 'zip'
+        filename: 'release.zip'
+    - name: Upload Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "release.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
