@@ -1,9 +1,11 @@
-# This is a basic workflow to help you get started with Actions
-name: Win32Sample GitHub Release
+name: GitHub Packaged Zip Release
 on:
   push:
     tags:
       - 'v*'
+      
+env:
+  DOTNET_VERSION: '6.0.x'
 jobs:
   create_release:
     name: Create GitHub Release
@@ -15,7 +17,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -23,14 +25,15 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Publish
-      run: dotnet publish
+      run: dotnet publish -c Release
     - name: Archive Release
       uses: thedoctor0/zip-release@main
       with:
         type: 'zip'
-        filename: 'release.zip'
+        filename: 'LLAS_Decryptor_${{  github.ref_name }}.zip'
+        path: D:\a\LLASDecryptor\LLASDecryptor\LLASDecryptor.Interface\bin\Release\net6.0-windows\
     - name: Upload Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "release.zip"
+        artifacts: 'LLAS_Decryptor_${{  github.ref_name }}.zip'
         token: ${{ secrets.GITHUB_TOKEN }}
