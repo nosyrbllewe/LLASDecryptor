@@ -8,8 +8,8 @@
     <AssemblyName>Love Live Decryptor</AssemblyName>
     <RepositoryUrl>https://github.com/nosyrbllewe/LLASDecryptor</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>0.1</AssemblyVersion>
-    <FileVersion>0.1</FileVersion>
+    <AssemblyVersion>0.2.1.1</AssemblyVersion>
+    <FileVersion>0.2.1.1</FileVersion>
     <SignAssembly>False</SignAssembly>
   </PropertyGroup>
 
