@@ -1,19 +1,24 @@
 # LLASDecryptor
 Decrypts Assets from the game Love Live School Idol Festival All Stars!
 
-### Requirements
- - Requires .NET 6 Runtime installed. Any recent Windows 10/11 version should have it
+NOTE: This application currently only official supports the Japanese release of the game. The global version may or may not work properly at this time.
 
 ### How to Use
 
-1. Download and extract the zip file into a folder
-2. Run the LLASDecryptor.exe
-3. With the application now open, select the input folder of the files in the first textbox (this should be the 'files' folder from SIFAS)
-4. In the second textbox, enter/select the folder where you want the files to be extracted to.
-5. Enter the decryption key you got likely got earlier from the PlayerPrefs
-6. On the left side, select the tables that you want to decrypt/export.
-7. Click on the "Decrypt" button
-8. After the progress bars finish, the files should now be decrypted into the chosen folder
+1. Get the SIFAS data files if you haven't already (see below).
+2. Download and extract the zip file into a folder
+3. Run the LLASDecryptor.exe
+4. With the application now open, select the "Input" folder of the files in the first textbox (this should be the 'files' folder from SIFAS)
+5. In the second textbox, enter/select the "Output" folder where you want the files to be extracted to.
+6. Enter the decryption key you got earlier from the PlayerPrefs
+7. On the left side, select the tables that you want to decrypt/export.
+8. Click on the "Decrypt" button
+9. After the progress bars finish, the files should now be decrypted into the chosen folder
+
+### Getting Data Files
+1. Turn on SIFAS and download all of the files
+2. Get the unique decryption key from PlayerPrefs file (likely requires root). Fortunately, this should only need to be done once per installation. The path is likely similar to "data/data/com.klab.lovelive.allstars/sharedprefs/com.klab.lovelive.allstars.v2.playerprefs.xml"
+3.  Copy the folder from "/sdcard/Android/data/com.klab.lovelive.allstars/files/files" containing the downloaded files to your computer. This is the "Input" folder from above.
 
 ### To Do
 - Add ability to retrieve only portion of audio files (e.g music or voice lines)
