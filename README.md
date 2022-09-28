@@ -1,7 +1,7 @@
 # Love Live All Stars! Decryptor
 Decrypts Assets from the game Love Live School Idol Festival All Stars!
 
-NOTE: This application currently only official supports the Japanese release of the game. The global version may or may not work properly at this time.
+NOTE: This application currently only officially supports the Japanese release of the game. The global version may or may not work properly at this time.
 
 ## Requirements
 - Requires installation of the .NET 6 runtime. This should already be pre-installed on any recent version of Windows 10 or 11.
