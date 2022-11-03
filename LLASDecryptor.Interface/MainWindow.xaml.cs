@@ -6,13 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-//using System.Windows.Forms;
 
 namespace LLASDecryptor.Interface
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public readonly DependencyProperty InputProp = DependencyProperty.Register(nameof(InputPath), typeof(string), typeof(MainWindow));
