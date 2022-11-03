@@ -33,7 +33,7 @@ namespace LLASDecryptor.Interface
             var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
             DatabaseTables.Tables
-                .Select(t => t.TableName)
+                .Select(t => t.DisplayName)
                 .OrderBy(t => t)
                 .ToList().
                 ForEach(t => TablesList.Items.Add(t));
@@ -79,11 +79,11 @@ namespace LLASDecryptor.Interface
             int tablesCompleted = 0;
             int totalTables = fileTables.Count;
             UpdateOverallProgress(tablesCompleted, totalTables);
-            foreach (var tableName in fileTables)
+            foreach (var tableDisplayName in fileTables)
             {
-                ProgressText.Text = $"Processing '{tableName}'";
+                ProgressText.Text = $"Processing '{tableDisplayName}'";
 
-                var table = DatabaseTables.Tables.Find(t => t.TableName == tableName);
+                var table = DatabaseTables.Tables.Single(t => t.DisplayName == tableDisplayName);
                 try
                 {
                     await decryptor.DecryptFiles(table);

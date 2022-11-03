@@ -10,9 +10,11 @@ namespace LLASDecryptor.Core
 {
     public sealed record AudioTable : Table
     {
-        public AudioTable(string tableName, string displayName) : base(tableName, displayName)
-        {
+        public string StartsWithNameFilter { get; } = string.Empty;
 
+        public AudioTable(string tableName, string displayName, string startsWithFilter = null) : base(tableName, displayName)
+        {
+            StartsWithNameFilter = startsWithFilter;
         }
 
         public override SqlColumn[] GetColumns()
@@ -36,10 +38,15 @@ namespace LLASDecryptor.Core
 
         private void CopyAudioFiles(string sheet_name, string acb_pack_name, string awb_pack_name, string inputPath, string outputPath)
         {
+            // Only process the file if it is the right type.
+            if (!string.IsNullOrEmpty(StartsWithNameFilter) && !sheet_name.StartsWith(StartsWithNameFilter))
+                return;
+
             string dir = $"{outputPath}{Path.DirectorySeparatorChar}";
 
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
+
 
             if(acb_pack_name != null)
             {
