@@ -18,26 +18,33 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="3*" />
         </Grid.RowDefinitions>
-        <Button Grid.Row="0" Name="FileButton" Content="Decrypt Files" HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Margin="5,5,5,5" Click="FileButton_Click" FontSize="20" />
+        <StackPanel Grid.Row="0" VerticalAlignment="Center">
+            <Button Name="FileButton" Content="Decrypt Files" HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Margin="5,5,5,5" Click="FileButton_Click" FontSize="20" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
+                <Label Content="Server:" />
+                <RadioButton IsChecked="True" GroupName="selectedServer" Content="Japanese (JP)" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <RadioButton GroupName="selectedServer" Content="Global (EN)" VerticalAlignment="Center"/>
+            </StackPanel>
+        </StackPanel>
         <StackPanel Grid.Column="0" Grid.Row="2" Margin="10,10"  Orientation="Vertical">
             <TextBlock>Tables to Decrypt:</TextBlock>
             <ListBox x:Name="TablesList" SelectionMode="Multiple" />
         </StackPanel>
         <StackPanel Grid.Column="1"  Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
-                <TextBlock TextWrapping="Wrap" Text="Input 'files' folder to decrypt:" VerticalAlignment="Center" Margin="70,5,5,5" />
+                <Label Content="Input 'files' folder to decrypt:" Margin="70,5,5,5" />
                 <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=_window, Path=InputPath, Mode=TwoWay,
                             UpdateSourceTrigger=PropertyChanged}" MinWidth="300" HorizontalAlignment="Stretch" />
-                <Button Name="InputFolderSelect" Height="23" Click="InputFolderSelect_Click">Select</Button>
+                <Button Name="InputFolderSelect" Height="23" Click="InputFolderSelect_Click" Content="Select"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBlock TextWrapping="Wrap" Text="Output folder to save decrypted files:" VerticalAlignment="Center" Margin="25,5,5,5" />
+                <Label Content="Output folder to save decrypted files:" Margin="25,5,5,5" />
                 <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=_window, Path=OutputPath, Mode=TwoWay,
                             UpdateSourceTrigger=PropertyChanged}" MinWidth="300" HorizontalAlignment="Stretch" />
-                <Button Name="OutputFolderSelect" Height="23" Click="OutputFolderSelect_Click">Select</Button>
+                <Button Name="OutputFolderSelect" Height="23" Click="OutputFolderSelect_Click" Content="Select"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBlock TextWrapping="Wrap" Text="Player Prefs Secret Key:" VerticalAlignment="Center" Margin="25,5,5,5" />
+                <Label Content="Player Prefs Secret Key:" Margin="25,5,5,5" />
                 <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=_window, Path=PlayerPrefsKey, Mode=TwoWay,
                             UpdateSourceTrigger=PropertyChanged}" MinWidth="500" HorizontalAlignment="Stretch" />
             </StackPanel>
