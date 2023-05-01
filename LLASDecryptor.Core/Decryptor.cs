@@ -57,11 +57,11 @@ namespace LLASDecryptor.Core
             }
         }
 
-        async Task ProcessData(List<object> data, Table table, string outputPath)
+        async Task ProcessData(List<object> data, Table table, string packageOutputPath)
         {
             try
             {
-                await table.ProcessRow(InputFileDirectory, outputPath, data.ToArray());
+                await table.ProcessRow(InputFileDirectory, packageOutputPath, data.ToArray());
             }
             catch (FileNotFoundException e)
             {

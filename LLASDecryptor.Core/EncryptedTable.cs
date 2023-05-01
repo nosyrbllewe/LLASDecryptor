@@ -26,6 +26,7 @@ namespace LLASDecryptor.Core
         {
             return new SqlColumn[]
             {
+                new SqlColumn("asset_path", SqliteType.Text),
                 new SqlColumn("pack_name", SqliteType.Text),
                 new SqlColumn("head", SqliteType.Integer),
                 new SqlColumn("size", SqliteType.Integer),
@@ -34,19 +35,19 @@ namespace LLASDecryptor.Core
             };
         }
 
-        public override async Task ProcessRow(string inputPath, string outputPath, object[] data)
+        public override async Task ProcessRow(string inputPath, string packageOutputPath, object[] data)
         {
             await Task.Run(() =>
             {
-                DecryptAssetFile((string)data[0], (int)data[1], (int)data[2], (int)data[3], (int)data[4], inputPath, outputPath);
+                DecryptAssetFile((string)data[0], (string)data[1], (int)data[2], (int)data[3], (int)data[4], (int)data[5], inputPath, packageOutputPath);
             });
         }
 
-        private void DecryptAssetFile(string pack_name, int head, int size, int key1, int key2, string inputPath, string outputPath)
+        private void DecryptAssetFile(string asset_path, string pack_name, int head, int size, int key1, int key2, string inputPath, string packageOutputPath)
         {
             string filePath = $"{inputPath}{Path.DirectorySeparatorChar}pkg{pack_name[0]}{Path.DirectorySeparatorChar}{pack_name}";
 
-            var tempFile = SplitFile(filePath, outputPath, head, size, key1, key2);
+            SplitFileAndDecryptFile(filePath, packageOutputPath, asset_path, head, size, key1, key2);
         }
 
         protected virtual string GetFileExtension(byte[] fileData)
@@ -63,27 +64,31 @@ namespace LLASDecryptor.Core
         }
 
 
-        private string SplitFile(string path, string outputPath, int head, int size, int key1, int key2)
+        private void SplitFileAndDecryptFile(string inputFilePath, string packageOutputPath, string asset_path, int head, int size, int key1, int key2)
         {
-            var file = File.OpenRead(path);
+            var file = File.OpenRead(inputFilePath);
             file.Position = head;
-            byte[] fileBytes = File.ReadAllBytes(path);
+            byte[] fileBytes = File.ReadAllBytes(inputFilePath);
             byte[] sectionBytes = new byte[size];
             Array.Copy(fileBytes, head, sectionBytes, 0, size);
 
-            if (!Directory.Exists(outputPath))
-                Directory.CreateDirectory(outputPath);
-
-            
+            if (!Directory.Exists(packageOutputPath))
+                Directory.CreateDirectory(packageOutputPath);
 
             LoveLiveDecryptor.DecryptFile(sectionBytes, 12345, key1, key2);
+            string fileName = GetFileName(inputFilePath, asset_path, head);
+            string fileOutputPath = $"{packageOutputPath}{Path.DirectorySeparatorChar}{fileName}{GetFileExtension(sectionBytes)}";
 
-            outputPath = $"{outputPath}{Path.DirectorySeparatorChar}{Path.GetFileName(path)}_{head}{GetFileExtension(sectionBytes)}";
+            string finalOutputFolder = Path.GetDirectoryName(fileOutputPath);
+            if (!Directory.Exists(finalOutputFolder))
+                Directory.CreateDirectory(finalOutputFolder);
 
-            File.WriteAllBytes(outputPath, sectionBytes);
-
-            return outputPath;
+            File.WriteAllBytes(fileOutputPath, sectionBytes);
         }
 
+        public virtual string GetFileName(string filePath, string asset_path, int headByteCount)
+        {
+            return $"{Path.GetFileName(filePath)}_{headByteCount}";
+        }
     }
 }

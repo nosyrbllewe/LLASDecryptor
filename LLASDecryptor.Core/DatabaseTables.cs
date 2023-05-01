@@ -6,7 +6,7 @@ namespace LLASDecryptor.Core
     {
         public static List<Table> Tables { get; } = new List<Table>()
         {
-            new EncryptedTable("adv_script", "Adv Script"),
+            new AdvTable("adv_script", "Adv Script"),
             new EncryptedTable("background", "Background"),
             new EncryptedTable("gacha_performance", "Gacha Performance"),
             new EncryptedTable("live2d_sd_model", "Live2D SD Model"),
