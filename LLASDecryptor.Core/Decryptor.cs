@@ -49,7 +49,7 @@ namespace LLASDecryptor.Core
             foreach (var table in tables)
             {
                 var columns = table.GetColumns();
-                string outputPath = OutputFileDirectory + "\\Packages" + Path.DirectorySeparatorChar + table.TableName;
+                string outputPath = OutputFileDirectory + "\\Packages" + Path.DirectorySeparatorChar + table.DisplayName;
                 foreach (var data in databaseReader.DecryptTable(table.TableName, columns))
                 {
                     await ProcessData(data, table, outputPath);
@@ -106,8 +106,8 @@ namespace LLASDecryptor.Core
                 string path = file.FullName;
                 byte[] data = File.ReadAllBytes(path);
                 LoveLiveDecryptor.DecryptDatabase(data, file.Name, PlayerPrefsKey);
-
-                string newFilePath = $"{OutputFileDirectory}{Path.DirectorySeparatorChar}{file.Name}.sqlite";
+                string processedName = file.Name.Split(".db_")[0];
+                string newFilePath = $"{OutputFileDirectory}{Path.DirectorySeparatorChar}{processedName}.sqlite";
                 File.WriteAllBytes(newFilePath, data);
             }
         }
