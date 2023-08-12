@@ -25,6 +25,6 @@ This should work on both the Japanese and Global servers of the game.
 3.  Copy the folder from "/sdcard/Android/data/com.klab.lovelive.allstars/files/files" containing the downloaded files to your computer. This is the "Input" folder from above.
 
 ### To Do
-- Add official support for the English server
-- Rewrite UI to be OS agnostic (e.g Blazor Desktop or Avalonia) to allow function on Mac and Linux 
+- Rewrite UI to be OS agnostic (e.g Blazor Desktop or Avalonia) to allow function on Mac and Linux
+- Allow getting specific textures and organizing them accordingly (e.g. cards, backgrounds, or emblems)
 
